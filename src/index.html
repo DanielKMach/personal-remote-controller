@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="index.js"></script>
+    <script src="https://kit.fontawesome.com/f4fd15096f.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="index.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Remote Controller</title>
+</head>
+
+<body>
+    <main>
+        <dialog>
+            Connecting...
+            <i class="rotate fa-solid fa-gear"></i>
+        </dialog>
+        <div id="top">
+            <button class="media" onclick="Send.nav('back')">
+                <i class="fa-solid fa-home"></i>
+            </button>
+            <button class="media b" onclick="Send.extra('maximize')">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+            <button class="media b" onclick="Send.extra('windows')">
+                <i class="fa-brands fa-microsoft"></i>
+            </button>
+            <button class="media b" onclick="Send.extra('reload')">
+                <i class="fa-solid fa-rotate-right"></i>
+            </button>
+            <button class="media red" onclick="Send.shutdown()">
+                <i class="fa-solid fa-power-off"></i>
+            </button>
+        </div>
+        <div id="main">
+            <div id="channel" class="v-tune">
+                <button class="media" onclick="Send.volume(1)">
+                    <i class="fa-solid fa-sun"></i>
+                </button>
+                <button class="media" onclick="Send.volume(-1)">
+                    <i class="fa-regular fa-sun"></i>
+                </button>
+            </div>
+
+            <div id="pad">
+                <button class="media b" onclick="Send.nav('s-tab')">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <button class="media blue" onclick="Send.nav('up')">
+                    <i class="fa-solid fa-chevron-up"></i>
+                </button>
+                <button class="media b" onclick="Send.nav('tab')">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                <button class="media blue" onclick="Send.nav('left')">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button class="media c green tall" onclick="Send.nav('enter')">
+                    <i class="fa-solid fa-circle-check"></i>
+                </button>
+                <button class="media blue" onclick="Send.nav('right')">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+                <button class="media b" onclick="Send.nav('space')">
+                    <i style="rotate: 270deg;" class="fa-solid fa-right-from-bracket"></i>
+                </button>
+                <button class="media blue" onclick="Send.nav('down')">
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+                <div></div>
+            </div>
+
+            <div id="volume" class="v-tune">
+                <button class="media" onclick=" Send.volume(1)">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+                <button class="media" onclick="Send.volume(-1)">
+                    <i class="fa-solid fa-volume-low"></i>
+                </button>
+            </div>
+        </div>
+        <div class="h-tune">
+            <button class="media b" onclick="Send.media('backward')">
+                <i class="fa-solid fa-backward"></i>
+            </button>
+            <button class="media tall" onclick="Send.media('play')">
+                <i class="fa-solid fa-play fa-xs"></i>
+                <i class="fa-solid fa-pause fa-xs"></i>
+            </button>
+            <button class="media b" onclick="Send.media('forward')">
+                <i class="fa-solid fa-forward"></i>
+            </button>
+        </div>
+        <div id="input">
+            <input type="text" name="text" id="text" placeholder="Remote typing">
+            <button class="media"
+                onclick="Send.type(document.getElementById('text').value); document.getElementById('text').value = ''">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
+    </main>
+</body>
+
+</html>

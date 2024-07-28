@@ -1,0 +1,18 @@
+.{
+    .name = "RemoteTV",
+    .version = "0.0.0",
+    .dependencies = .{
+        .network = .{
+            .url = "https://github.com/ikskuh/zig-network/archive/bcf6cc8918d574f947b2647522d84a805c33f1c8.tar.gz",
+            .hash = "12203b3634f36570ffced059248bd429cd06dc89a98659c86569d890fdd99b5070bd",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        // For example...
+        //"LICENSE",
+        //"README.md",
+    },
+}
