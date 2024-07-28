@@ -287,6 +287,8 @@ pub fn runCommand(args: *std.mem.SplitIterator(u8, .any), allocator: std.mem.All
                 } else if (std.mem.eql(u8, extra, "windows")) {
                     try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_LWIN } } });
                     try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_LWIN, .dwFlags = windows.KEYEVENTF_KEYUP, .time = 50 } } });
+                } else if (std.mem.eql(u8, extra, "search")) {
+                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = 'S' } } });
                 } else {
                     return error.InvalidCommandArgument;
                 }
@@ -345,6 +347,8 @@ pub fn runCommand(args: *std.mem.SplitIterator(u8, .any), allocator: std.mem.All
                 } else if (std.mem.eql(u8, dir, "back")) {
                     try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_ESCAPE } } });
                     try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_ESCAPE, .dwFlags = windows.KEYEVENTF_KEYUP, .time = 50 } } });
+                } else if (std.mem.eql(u8, dir, "backspace")) {
+                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_BACK } } });
                 } else if (std.mem.eql(u8, dir, "tab")) {
                     try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_TAB } } });
                 } else if (std.mem.eql(u8, dir, "s-tab")) {

@@ -66,7 +66,7 @@ const Send = Object.freeze({
         }
     },
     nav(dir) {
-        if (!dir in ["up", "down", "left", "right", "enter", "back", "tab", "s-tab"]) return;
+        if (!dir in ["up", "down", "left", "right", "enter", "space", "back", "backspace", "tab", "s-tab"]) return;
         this.send("NAV " + dir);
     },
     media(action) {
@@ -74,7 +74,7 @@ const Send = Object.freeze({
         this.send("MEDIA " + action);
     },
     extra(action) {
-        if (!action in ["maximize", "reload", "windows"]) return;
+        if (!action in ["maximize", "reload", "windows", "search"]) return;
         this.send("EXTRA " + action);
     },
     shutdown() {
