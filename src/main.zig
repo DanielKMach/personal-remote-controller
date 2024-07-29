@@ -118,8 +118,8 @@ pub fn handleRequest(reader: network.Socket.Reader, writer: network.Socket.Write
     http_log.info("Received request: {s}", .{path});
 
     if (std.mem.eql(u8, path, "/")) {
-        const index = @embedFile("index.html");
-        const response_template = @embedFile("response.txt");
+        const index = @embedFile("res\\routes\\index.html");
+        const response_template = @embedFile("res\\response.txt");
         http_log.info("Sending html page as response", .{});
         try writer.print(response_template, .{ "text/html", index.len, index });
     } else if (std.mem.eql(u8, path, "/cmds")) {
@@ -128,7 +128,7 @@ pub fn handleRequest(reader: network.Socket.Reader, writer: network.Socket.Write
                 if (headers.get("Sec-WebSocket-Key")) |key| {
                     const response_key = try generateHandshakeKey(key, alloc);
                     http_log.info("Generated response key: '{s}' -> '{s}'", .{ key, response_key });
-                    const response_template = @embedFile("upgrade_response.txt");
+                    const response_template = @embedFile("res\\upgrade_response.txt");
                     http_log.info("Sending handshake", .{});
                     try writer.print(response_template, .{response_key});
                     spawnThread(listenWS, .{ writer.context, allocator });
@@ -139,13 +139,13 @@ pub fn handleRequest(reader: network.Socket.Reader, writer: network.Socket.Write
             }
         }
     } else if (std.mem.eql(u8, path, "/index.js")) {
-        const script = @embedFile("index.js");
-        const response_template = @embedFile("response.txt");
+        const script = @embedFile("res\\routes\\index.js");
+        const response_template = @embedFile("res\\response.txt");
         http_log.info("Sending script as response", .{});
         try writer.print(response_template, .{ "text/javascript", script.len, script });
     } else if (std.mem.eql(u8, path, "/index.css")) {
-        const style = @embedFile("index.css");
-        const response_template = @embedFile("response.txt");
+        const style = @embedFile("res\\routes\\index.css");
+        const response_template = @embedFile("res\\response.txt");
         http_log.info("Sending CSS as response", .{});
         try writer.print(response_template, .{ "text/css", style.len, style });
     } else {
