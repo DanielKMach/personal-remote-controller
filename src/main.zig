@@ -1,7 +1,7 @@
 const builtin = @import("builtin");
 const std = @import("std");
 const network = @import("network");
-const windows = if (builtin.os.tag == .windows) @cImport(@cInclude("windows.h")) else undefined;
+const input = @import("input.zig");
 
 const log = std.log.default;
 const http_log = std.log.scoped(.http);
@@ -10,11 +10,6 @@ const ws_log = std.log.scoped(.ws);
 var thread_list: std.ArrayList(std.Thread) = undefined;
 
 pub fn main() !void {
-    if (builtin.os.tag != .windows) {
-        try std.io.getStdOut().writer().print("This application only supports Windows.\r\n", .{});
-        return;
-    }
-
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer if (gpa.deinit() != .ok) log.warn("Memory leaked somewhere", .{}) else undefined;
 
@@ -279,103 +274,89 @@ pub fn runCommand(args: *std.mem.SplitIterator(u8, .any), allocator: std.mem.All
     if (args.next()) |cmd| {
         if (std.mem.eql(u8, cmd, "EXTRA")) {
             if (args.next()) |extra| {
-                var inputs = try std.BoundedArray(windows.INPUT, 3).init(0);
                 if (std.mem.eql(u8, extra, "reload")) {
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_F5 } } });
+                    input.tap(.f5);
                 } else if (std.mem.eql(u8, extra, "maximize")) {
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = 'F' } } });
+                    input.tap(.f);
                 } else if (std.mem.eql(u8, extra, "windows")) {
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_LWIN } } });
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_LWIN, .dwFlags = windows.KEYEVENTF_KEYUP, .time = 50 } } });
+                    input.tap(.super);
                 } else if (std.mem.eql(u8, extra, "search")) {
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = 'S' } } });
+                    input.tap(.s);
                 } else {
                     return error.InvalidCommandArgument;
                 }
-                _ = windows.SendInput(inputs.len, &inputs.buffer, @sizeOf(windows.INPUT));
             }
-        }
-        if (std.mem.eql(u8, cmd, "PRESS")) {
+        } else if (std.mem.eql(u8, cmd, "PRESS")) {
             if (args.next()) |k| {
-                if (k.len == 1 and std.ascii.isAlphanumeric(k[0])) {
-                    var input = windows.INPUT{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = std.ascii.toUpper(k[0]) } } };
-                    _ = windows.SendInput(1, &input, @sizeOf(windows.INPUT));
+                if (k.len == 1) {
+                    var c = k[0];
+                    if (std.ascii.isAlphabetic(c) and std.ascii.isLower(c)) {
+                        c = std.ascii.toUpper(c);
+                    }
+                    input.tap(try input.VK.fromAscii(c));
                 } else {
                     return error.InvalidCommandArgument;
                 }
             }
         } else if (std.mem.eql(u8, cmd, "TYPE")) {
-            if (args.next()) |text| {
-                var inputs = try std.BoundedArray(windows.INPUT, 3).init(0);
-                for (text) |c| {
-                    try inputs.resize(0);
-                    if (std.ascii.isUpper(c)) try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_SHIFT } } });
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = std.ascii.toUpper(c) } } });
-                    if (std.ascii.isUpper(c)) try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_SHIFT, .dwFlags = windows.KEYEVENTF_KEYUP, .time = 50 } } });
-                    _ = windows.SendInput(@intCast(inputs.len), &inputs.buffer, @sizeOf(windows.INPUT));
-                }
+            while (args.next()) |text| {
+                input.write(text);
+                if (args.peek()) |_| input.tap(.space);
             }
         } else if (std.mem.eql(u8, cmd, "VOL")) {
             if (args.next()) |dir| {
-                var input: windows.INPUT = undefined;
                 if (std.mem.eql(u8, dir, "up")) {
-                    input = .{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_VOLUME_UP } } };
+                    input.tap(.volume_up);
                 } else if (std.mem.eql(u8, dir, "down")) {
-                    input = .{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_VOLUME_DOWN } } };
+                    input.tap(.volume_down);
                 } else if (std.mem.eql(u8, dir, "mute")) {
-                    input = .{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_VOLUME_MUTE } } };
+                    input.tap(.volume_mute);
                 } else {
                     return error.InvalidCommandArgument;
                 }
-                _ = windows.SendInput(1, &input, @sizeOf(windows.INPUT));
             }
         } else if (std.mem.eql(u8, cmd, "NAV")) {
             if (args.next()) |dir| {
-                var inputs = try std.BoundedArray(windows.INPUT, 3).init(0);
                 if (std.mem.eql(u8, dir, "up")) {
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_UP } } });
+                    input.tap(.up);
                 } else if (std.mem.eql(u8, dir, "down")) {
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_DOWN } } });
+                    input.tap(.down);
                 } else if (std.mem.eql(u8, dir, "left")) {
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_LEFT } } });
+                    input.tap(.left);
                 } else if (std.mem.eql(u8, dir, "right")) {
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_RIGHT } } });
+                    input.tap(.right);
                 } else if (std.mem.eql(u8, dir, "enter")) {
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_RETURN } } });
+                    input.tap(.enter);
                 } else if (std.mem.eql(u8, dir, "space")) {
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_SPACE } } });
+                    input.tap(.space);
                 } else if (std.mem.eql(u8, dir, "back")) {
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_ESCAPE } } });
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_ESCAPE, .dwFlags = windows.KEYEVENTF_KEYUP, .time = 50 } } });
+                    input.tap(.escape);
                 } else if (std.mem.eql(u8, dir, "backspace")) {
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_BACK } } });
+                    input.tap(.backspace);
                 } else if (std.mem.eql(u8, dir, "tab")) {
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_TAB } } });
+                    input.tap(.tab);
                 } else if (std.mem.eql(u8, dir, "s-tab")) {
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_LSHIFT } } });
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_TAB } } });
-                    try inputs.append(.{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_LSHIFT, .dwFlags = windows.KEYEVENTF_KEYUP, .time = 50 } } });
+                    input.press(.shift);
+                    input.tap(.tab);
+                    input.release(.shift);
                 } else {
                     return error.InvalidCommandArgument;
                 }
-                _ = windows.SendInput(inputs.len, &inputs.buffer, @sizeOf(windows.INPUT));
             }
         } else if (std.mem.eql(u8, cmd, "MEDIA")) {
             if (args.next()) |mode| {
-                var input: windows.INPUT = undefined;
                 if (std.mem.eql(u8, mode, "play")) {
-                    input = .{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_MEDIA_PLAY_PAUSE } } };
+                    input.tap(.media_play_pause);
                 } else if (std.mem.eql(u8, mode, "forward")) {
-                    input = .{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_MEDIA_NEXT_TRACK } } };
+                    input.tap(.media_next);
                 } else if (std.mem.eql(u8, mode, "backward")) {
-                    input = .{ .type = windows.INPUT_KEYBOARD, .unnamed_0 = .{ .ki = .{ .wVk = windows.VK_MEDIA_PREV_TRACK } } };
+                    input.tap(.media_prev);
                 } else {
                     return error.InvalidCommandArgument;
                 }
-                _ = windows.SendInput(1, &input, @sizeOf(windows.INPUT));
             }
         } else if (std.mem.eql(u8, cmd, "SHUTDOWN")) {
-            _ = windows.ExitWindowsEx(windows.EWX_POWEROFF, 0);
+            input.tap(.sleep);
         } else {
             return error.InvalidCommand;
         }
