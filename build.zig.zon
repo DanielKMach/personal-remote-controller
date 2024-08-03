@@ -1,6 +1,6 @@
 .{
     .name = "Personal Remote Controller",
-    .version = "0.0.0",
+    .version = "0.0.1",
     .dependencies = .{
         .network = .{
             .url = "https://github.com/ikskuh/zig-network/archive/bcf6cc8918d574f947b2647522d84a805c33f1c8.tar.gz",
