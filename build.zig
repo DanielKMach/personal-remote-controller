@@ -14,7 +14,7 @@ pub fn build(b: *std.Build) !void {
 
     // Build
     const exe = b.addExecutable(.{
-        .name = "PRC",
+        .name = "prc",
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
