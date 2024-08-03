@@ -14,7 +14,7 @@ pub fn build(b: *std.Build) !void {
 
     // Build
     const exe = b.addExecutable(.{
-        .name = "RemoteTV",
+        .name = "PRC",
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,

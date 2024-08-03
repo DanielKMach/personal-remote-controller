@@ -1,5 +1,5 @@
 .{
-    .name = "RemoteTV",
+    .name = "Personal Remote Controller",
     .version = "0.0.0",
     .dependencies = .{
         .network = .{
